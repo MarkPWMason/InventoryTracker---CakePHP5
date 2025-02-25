@@ -128,19 +128,15 @@ class ProductsController extends AppController
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $this->response = $this->response->withType('application/json');
+        $this->autoRender = false; // Disable rendering for AJAX requests
 
         $product = $this->Products->get($id);
-        try {
-            if ($this->Products->delete($product)) {
-                $response = ['success' => true, 'message' => 'Product deleted successfully.'];
-            } else {
-                $response = ['success' => false, 'errors' => ['The product could not be deleted. Please, try again.']];
-            }
-        } catch (\Exception $e) {
-            $response = ['success' => false, 'errors' => ['An error occurred: ' . $e->getMessage()]];
-        }
+        $product->deleted = true;
 
-        return $this->response->withStringBody(json_encode($response));
+        if ($this->Products->save($product)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
     }
 }
